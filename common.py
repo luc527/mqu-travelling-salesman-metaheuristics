@@ -22,4 +22,3 @@ distmatrix = parse_instance(sys.argv[1])
 print_matrix(distmatrix)
 
 # let's get instances from http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp/
-# these matrices contain only the upper row
