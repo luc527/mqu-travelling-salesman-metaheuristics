@@ -1,3 +1,5 @@
+# TODO random walk
+
 from typing import Tuple
 import tsplib95 as tsplib
 import networkx as nx
@@ -42,6 +44,10 @@ def brute_force(g: nx.Graph) -> Tuple[float, list]:
     all_cycles = map(list, permutations(range(g.number_of_nodes())))
     return min(map(lambda s: (evaluate(g, s), s), all_cycles))
 
+def random_walk(g: nx.Graph) -> Tuple[float, list]:
+    # TODO
+    pass
+
 def evaluate(graph, solution):
     s = 0
     n = len(solution)
@@ -61,30 +67,72 @@ def neighborhood(solution):
         neighborhood.append(nb)
     return neighborhood
 
-def simple_local_search(graph: nx.Graph) -> Tuple[float, list]:
-    # Initial solution: random cycle
-    solution = [i for i in range(graph.number_of_nodes())]
+def random_cycle(n):
+    solution = list(range(n))
     random.shuffle(solution)
-    weight = evaluate(graph, solution)
+    return solution
 
-    # Stop criteria: # of iterations
-    for _ in range(1000):
-        best = min(map( \
-            lambda sol: (evaluate(graph, sol), sol), \
-            neighborhood(solution) \
-        ))
-        if best[0] < weight:
-            (weight, solution) = best
-    return (weight, solution)
+# sls: simple local search
+
+# TODO make sls as a function that takes a neighborhood selection strategy (another function)
+
+"""
+Busca local simples com melhor melhora
+"""
+def sls_best(graph: nx.Graph) -> Tuple[float, list]:
+    global iterations
+
+    curr_solution = random_cycle(graph.number_of_nodes())
+    curr_weight   = evaluate(graph, curr_solution)
+
+    for _ in range(iterations):
+        best_solution = curr_solution
+        best_weight   = curr_weight
+        for solution in neighborhood(curr_solution):
+            weight = evaluate(graph, solution)
+            if weight < best_weight:
+                best_solution = solution
+                best_weight = weight
+
+        curr_solution = best_solution
+        curr_weight = best_weight
+
+    return (curr_weight, curr_solution)
+
+
+"""
+Busca local simples com primeira melhora
+"""
+def sls_first(graph: nx.Graph) -> Tuple[float, list]:
+    global iterations
+
+    curr_solution = random_cycle(graph.number_of_nodes())
+    curr_weight   = evaluate(graph, curr_solution)
+
+    for _ in range(iterations):
+        for solution in neighborhood(curr_solution):
+            weight = evaluate(graph, solution)
+            if weight < curr_weight:
+                curr_solution = solution
+                curr_weight   = weight
+                break
+
+    return (curr_weight, curr_solution)
 
 
 path = sys.argv[1]
 
+iterations = int(sys.argv[2]) if len(sys.argv) > 1 else 65536
+
 graph = parse_instance(path)
 
-(weight, solution) = simple_local_search(graph)
-print(weight, solution)
+print('Busca local simples com primeira melhora:')
+print(sls_first(graph))
 
-print(brute_force(graph))
+print('Busca local simples com melhor melhora:')
+print(sls_best(graph))
 
-output_image(path, graph, solution)
+#print('Solução ótima por força bruta:')
+#print(brute_force(graph))
+
+# output_image(path, graph, solution)
