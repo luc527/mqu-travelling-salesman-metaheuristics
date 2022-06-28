@@ -38,6 +38,8 @@ def best_neighbour(graph, curr_solution, curr_weight):
 Simple local search
 """
 
+# TODO make simple_local_search take a strategy and *return a function* that uses that strategy
+
 def simple_local_search(graph: nx.Graph, select_fn) -> Tuple[float, list]:
     global iterations
 

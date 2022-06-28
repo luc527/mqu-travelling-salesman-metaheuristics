@@ -8,18 +8,18 @@ from itertools import permutations
 
 # let's get instances from http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp/
 
-def output_image(path, graph, cycle):
+def output_image(filepath: str, graph: nx.Graph, cycle: list):
     lastidx = -1
-    for i, c in enumerate(path):
+    for i, c in enumerate(filepath):
         if c == '/':
             lastidx = i
-    path = path[lastidx+1:]
+    filepath = filepath[lastidx+1:]
 
     verts = graph.number_of_nodes()
 
     cycle_edges = list(zip(cycle, [cycle[-1]] + cycle[:-1]))
 
-    viz = graphviz.Graph(path)
+    viz = graphviz.Graph(filepath)
     # viz.attr('node', {'shape': 'point'})
     viz.attr('edge', {'fontsize': '8'})
     for a in range(verts):
@@ -33,7 +33,7 @@ def output_image(path, graph, cycle):
                 attr['penwidth'] = '3'
             viz.edge(str(a), str(b), label, attr)
     dir = 'images'
-    print(f'Rendered graph on {path}, see {viz.render(directory=dir)}') 
+    print(f'Rendered graph on {filepath}, see {viz.render(directory=dir)}') 
 
 def parse_instance(filename):
     return tsplib.load(filename).get_graph()
