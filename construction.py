@@ -1,3 +1,4 @@
+import sys
 from common import *
 
 def greedy_cycle(graph: nx.Graph) -> Tuple[float, int]:
@@ -14,10 +15,9 @@ def greedy_cycle(graph: nx.Graph) -> Tuple[float, int]:
     visited = 1
     cycle.append(curr_node)
 
-    min_adjacent_node = -1
-    min_weight = float('inf')
-
     while visited < nodes:
+        min_adjacent_node = -1
+        min_weight = float('inf')
         for other_node in range(nodes):
             if marked[other_node]:
                 continue
@@ -33,10 +33,11 @@ def greedy_cycle(graph: nx.Graph) -> Tuple[float, int]:
     
     return (evaluate(graph, cycle), cycle)
 
+# TODO implement greedy-alpha
+
 graph = parse_instance(sys.argv[1])
+(weight, solution) = greedy_cycle(graph)
 
-print(graph)
+print((weight, solution))
 
-
-# TODO fixme not working
-print(greedy_cycle(graph))
+output_image(sys.argv[1], graph, solution)

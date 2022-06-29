@@ -2,7 +2,6 @@ from typing import Tuple
 import tsplib95 as tsplib
 import networkx as nx
 import graphviz
-import sys
 import random
 from itertools import permutations
 
