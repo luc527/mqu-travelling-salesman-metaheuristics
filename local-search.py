@@ -54,6 +54,19 @@ def simple_local_search(graph: nx.Graph, select_fn) -> Tuple[float, list]:
 
     return (curr_weight, curr_solution)
 
+def simple_local_search(select_neighbour):
+    def sls_with_given_select_fn(iterations: int, graph: nx.Graph) -> Tuple[float, list]:
+        curr_solution = random_cycle(graph.number_of_nodes())
+        curr_weight   = evaluate(graph, curr_solution)
+        for _ in range(iterations):
+            (weight, solution) = select_neighbour(graph, curr_solution, curr_weight)
+            if weight < curr_weight:
+                curr_solution = solution
+                curr_weight   = weight
+        return (curr_weight, curr_solution)
+    return sls_with_given_select_fn
+
+
 
 path = sys.argv[1]
 
@@ -65,10 +78,13 @@ else:
 graph = parse_instance(path)
 
 print('Busca local simples com primeira melhora:')
-print(simple_local_search(graph, first_better_neighbour))
+print(simple_local_search(first_better_neighbour)(iterations, graph))
 
 print('Busca local simples com melhor melhora:')
-print(simple_local_search(graph, best_neighbour))
+print(simple_local_search(best_neighbour)(iterations, graph))
+
+print('Caminhada aleatória')
+print(random_walk(iterations, graph))
 
 #print('Solução ótima por força bruta:')
 #print(brute_force(graph))

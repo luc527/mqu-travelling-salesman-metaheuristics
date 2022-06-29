@@ -42,9 +42,15 @@ def brute_force(g: nx.Graph) -> Tuple[float, list]:
     all_cycles = map(list, permutations(range(g.number_of_nodes())))
     return min(map(lambda s: (evaluate(g, s), s), all_cycles))
 
-def random_walk(g: nx.Graph) -> Tuple[float, list]:
-    # TODO
-    pass
+def random_walk(iterations: int, g: nx.Graph) -> Tuple[float, list]:
+    n = g.number_of_nodes()
+    sol = random_cycle(n)
+    for _ in range(iterations):
+        v = random.randrange(0, n)
+        w = (v + 1) % n
+        sol[v], sol[w] = sol[w], sol[v]
+    return (evaluate(g, sol), sol)
+
 
 def evaluate(graph, solution):
     s = 0
