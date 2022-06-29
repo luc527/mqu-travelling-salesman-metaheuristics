@@ -39,22 +39,6 @@ def best_neighbour(graph, curr_solution, curr_weight):
 Simple local search
 """
 
-# TODO make simple_local_search take a strategy and *return a function* that uses that strategy
-
-def simple_local_search(graph: nx.Graph, select_fn) -> Tuple[float, list]:
-    global iterations
-
-    curr_solution = random_cycle(graph.number_of_nodes())
-    curr_weight   = evaluate(graph, curr_solution)
-
-    for _ in range(iterations):
-        (weight, solution) = select_fn(graph, curr_solution, curr_weight)
-        if weight < curr_weight:
-            curr_solution = solution
-            curr_weight   = weight
-
-    return (curr_weight, curr_solution)
-
 def simple_local_search(select_neighbour):
     def sls_with_given_select_fn(iterations: int, graph: nx.Graph) -> Tuple[float, list]:
         curr_solution = random_cycle(graph.number_of_nodes())
