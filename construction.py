@@ -35,6 +35,8 @@ def greedy_cycle(graph: nx.Graph) -> Tuple[float, int]:
 
 # TODO implement greedy-alpha
 
+# -> get from the best k at *each step* (each for other_node ...)
+
 graph = parse_instance(sys.argv[1])
 (weight, solution) = greedy_cycle(graph)
 
