@@ -1,10 +1,13 @@
 import sys
 import random
+
 from common import *
+from local_search import randomized_local_search
+
 from math import ceil
 from heapq import heappush, heappushpop
 
-def greedy_cycle(graph: nx.Graph) -> Tuple[float, int]:
+def greedy(graph: nx.Graph) -> Tuple[float, int]:
     nodes = graph.number_of_nodes()
 
     cycle = []
@@ -36,7 +39,7 @@ def greedy_cycle(graph: nx.Graph) -> Tuple[float, int]:
     
     return (evaluate(graph, cycle), cycle)
 
-def greedy_alpha_cycle(graph: nx.Graph, alpha: float) -> Tuple[float, list]:
+def greedy_alpha(graph: nx.Graph, alpha: float) -> Tuple[float, list]:
     n = graph.number_of_nodes()
     cycle = []
     cycle_weight = 0
@@ -85,18 +88,52 @@ def greedy_alpha_cycle(graph: nx.Graph, alpha: float) -> Tuple[float, list]:
 
     return (cycle_weight, cycle)
 
+def repeated_greedy_alpha(iterations: int, graph: nx.Graph, alpha: float) -> Tuple[float, list]:
+    (inc_weight, inc_solution) = greedy_alpha(graph, alpha)
+    for _ in range(iterations):
+        (weight, solution) = greedy_alpha(graph, alpha)
+        if weight < inc_weight:
+            inc_weight, inc_solution = weight, solution
+    return (inc_weight, inc_solution)
 
+def grasp(iterations: int, graph: nx.Graph, alpha: float) -> Tuple[float, list]:
+    (inc_weight, inc_solution) = greedy_alpha(graph, alpha)
 
-graph = parse_instance(sys.argv[1])
+    for _ in range(iterations):
+        (weight, solution) = greedy_alpha(graph, alpha)
+        (weight, solution) = randomized_local_search(iterations, graph, 0.3, solution)
+        if weight < inc_weight:
+            inc_weight, inc_solution = weight, solution
 
-(weight, solution) = greedy_cycle(graph)
-print('Greedy:')
-print(weight, solution)
-print()
+    return (inc_weight, inc_solution)
 
-(weight, solution) = greedy_alpha_cycle(graph, 0.2)
-print('Greedy-alpha:')
-print(weight, solution)
-print()
+def greedy_then_rls(iterations: int, graph: nx.Graph, probability: float):
+    (weight, solution) = greedy(graph)
+    (weight, solution) = randomized_local_search(iterations, graph, probability, solution)
+    return (weight, solution)
 
-#output_image(sys.argv[1], graph, solution)
+if __name__ == '__main__':
+
+    graph = parse_instance(sys.argv[1])
+
+    #(weight, solution) = greedy(graph)
+    #print('Greedy:')
+    #print(weight, solution)
+    #print()
+
+    #(weight, solution) = repeated_greedy_alpha(1000, graph, 0.3)
+    #print('Repeated greedy-alpha:')
+    #print(weight, solution)
+    #print()
+
+    #(weight, solution) = grasp(200, graph, 0.2)
+    #print('GRASP:')
+    #print(weight, solution)
+    #print()
+
+    (weight, solution) = greedy_then_rls(10000, graph, 0.3)
+    print('Greedy followed by randomized local search:')
+    print(weight, solution)
+    print()
+
+    #output_image(sys.argv[1], graph, solution)

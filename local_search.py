@@ -45,9 +45,9 @@ Simple local search
 """
 
 def simple_local_search(select_neighbour):
-    def sls_with_given_select_fn(iterations: int, graph: nx.Graph) -> Tuple[float, list]:
+    def sls_with_given_select_fn(iterations: int, graph: nx.Graph, initial_solution: list = None) -> Tuple[float, list]:
 
-        curr_solution = random_cycle(graph.number_of_nodes())
+        curr_solution = initial_solution if initial_solution is not None else random_cycle(graph.number_of_nodes())
         curr_weight   = evaluate(graph, curr_solution)
 
         for _ in range(iterations):
@@ -68,12 +68,12 @@ def simple_local_search(select_neighbour):
 Randomized local search
 """
 
-def randomized_local_search(iterations, graph, p):
-    
-    # s: current solution and its weight
-    solution = random_cycle(graph.number_of_nodes())
-    weight   = evaluate(graph, solution)
+def randomized_local_search(iterations: int, graph: nx.Graph, probability: float, initial_solution: list = None) -> Tuple[float, int]:
 
+    # s: current solution and its weight
+    solution = initial_solution if initial_solution is not None else random_cycle(graph.number_of_nodes())
+    weight   = evaluate(graph, solution)
+    
     # s*: incumbent solution and its weight
     inc_solution = solution
     inc_weight   = weight
@@ -81,7 +81,7 @@ def randomized_local_search(iterations, graph, p):
     for _ in range(iterations):
         r = random.random()
 
-        if r <= p:
+        if r <= probability:
             (weight, solution) = random_neighbour(graph, solution)
         else:
             (weight, solution) = best_neighbour(graph, solution, weight)
@@ -92,32 +92,34 @@ def randomized_local_search(iterations, graph, p):
 
     return (inc_weight, inc_solution)
 
-path = sys.argv[1]
+if __name__ == '__main__':
 
-if len(sys.argv) > 2:
-    iterations = int(sys.argv[2])
-else:
-    iterations = 65536
+    path = sys.argv[1]
 
-graph = parse_instance(path)
+    if len(sys.argv) > 2:
+        iterations = int(sys.argv[2])
+    else:
+        iterations = 1000
 
-print('Busca local simples com primeira melhora:')
-print(simple_local_search(first_better_neighbour)(iterations, graph))
-print()
+    graph = parse_instance(path)
 
-print('Busca local simples com melhor melhora:')
-print(simple_local_search(best_neighbour)(iterations, graph))
-print()
+    print('Busca local simples com primeira melhora:')
+    print(simple_local_search(first_better_neighbour)(iterations, graph))
+    print()
 
-print('Busca local randomizada:')
-print(randomized_local_search(iterations, graph, 0.5))
-print()
+    print('Busca local simples com melhor melhora:')
+    print(simple_local_search(best_neighbour)(iterations, graph))
+    print()
 
-print('Caminhada aleatória')
-print(random_walk(iterations, graph))
-print()
+    print('Busca local randomizada:')
+    print(randomized_local_search(iterations, graph, 0.5))
+    print()
 
-#print('Solução ótima por força bruta:')
-#print(brute_force(graph))
+    print('Caminhada aleatória')
+    print(random_walk(iterations, graph))
+    print()
 
-# output_image(path, graph, solution)
+    #print('Solução ótima por força bruta:')
+    #print(brute_force(graph))
+
+    # output_image(path, graph, solution)
