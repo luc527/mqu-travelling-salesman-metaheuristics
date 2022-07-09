@@ -8,23 +8,27 @@ from math import ceil
 from heapq import heappush, heappushpop
 
 def greedy(graph: nx.Graph) -> Tuple[float, int]:
-    nodes = graph.number_of_nodes()
+    nodes = list(graph.nodes)
+    num_nodes = graph.number_of_nodes()
 
     cycle = []
 
-    marked = [False for _ in range(nodes)]
+    marked = {}
+    for node in graph.nodes:
+        marked[node] = False
+
     visited = 0
 
     # Start at 0
-    curr_node =  0
+    curr_node = nodes[0]
     marked[curr_node] = True
     visited = 1
     cycle.append(curr_node)
 
-    while visited < nodes:
+    while visited < num_nodes:
         min_adjacent_node = -1
         min_weight = float('inf')
-        for other_node in range(nodes):
+        for other_node in nodes:
             if marked[other_node]:
                 continue
             weight = graph.edges[curr_node, other_node]['weight']
@@ -40,18 +44,22 @@ def greedy(graph: nx.Graph) -> Tuple[float, int]:
     return (evaluate(graph, cycle), cycle)
 
 def greedy_alpha(graph: nx.Graph, alpha: float) -> Tuple[float, list]:
+    nodes = list(graph.nodes)
     n = graph.number_of_nodes()
+
     cycle = []
     cycle_weight = 0
 
-    marked  = [False for _ in range(n)]
+    marked = {}
+    for node in nodes:
+        marked[node] = False
     visited = 0
 
     # Start at 0
-    curr_node = 0
-    marked[0] = True
+    curr_node = nodes[0]
+    marked[curr_node] = True
     visited = 1
-    cycle.append(0)
+    cycle.append(curr_node)
 
     while visited < n:
 
@@ -66,7 +74,7 @@ def greedy_alpha(graph: nx.Graph, alpha: float) -> Tuple[float, list]:
 
         bestk = []
 
-        for other_node in range(n):
+        for other_node in nodes:
             if marked[other_node]:
                 continue
             weight = graph.edges[curr_node, other_node]['weight']
@@ -116,24 +124,24 @@ if __name__ == '__main__':
 
     graph = parse_instance(sys.argv[1])
 
-    #(weight, solution) = greedy(graph)
-    #print('Greedy:')
-    #print(weight, solution)
-    #print()
-
-    #(weight, solution) = repeated_greedy_alpha(1000, graph, 0.3)
-    #print('Repeated greedy-alpha:')
-    #print(weight, solution)
-    #print()
-
-    #(weight, solution) = grasp(200, graph, 0.2)
-    #print('GRASP:')
-    #print(weight, solution)
-    #print()
-
-    (weight, solution) = greedy_then_rls(10000, graph, 0.3)
-    print('Greedy followed by randomized local search:')
+    print('Greedy:')
+    (weight, solution) = greedy(graph)
     print(weight, solution)
     print()
+
+    print('Repeated greedy-alpha:')
+    (weight, solution) = repeated_greedy_alpha(1000, graph, 0.3)
+    print(weight, solution)
+    print()
+
+    print('Greedy followed by randomized local search:')
+    (weight, solution) = greedy_then_rls(10000, graph, 0.3)
+    print(weight, solution)
+    print()
+
+    # print('GRASP:')
+    # (weight, solution) = grasp(1000, graph, 0.3)
+    # print(weight, solution)
+    # print()
 
     #output_image(sys.argv[1], graph, solution)

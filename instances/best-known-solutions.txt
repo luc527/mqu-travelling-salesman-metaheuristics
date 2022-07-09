@@ -1,0 +1,9 @@
+# Instances taken from http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/
+# Best known solutions specifically from http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/STSP.html
+att48           10628
+brazil6         77
+brazil58        25395
+bayg29          1610
+bays29          2020
+bier127         118282
+berlin52        7542

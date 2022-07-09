@@ -47,7 +47,7 @@ Simple local search
 def simple_local_search(select_neighbour):
     def sls_with_given_select_fn(iterations: int, graph: nx.Graph, initial_solution: list = None) -> Tuple[float, list]:
 
-        curr_solution = initial_solution if initial_solution is not None else random_cycle(graph.number_of_nodes())
+        curr_solution = initial_solution if initial_solution is not None else random_cycle(graph.nodes)
         curr_weight   = evaluate(graph, curr_solution)
 
         for _ in range(iterations):
@@ -71,7 +71,7 @@ Randomized local search
 def randomized_local_search(iterations: int, graph: nx.Graph, probability: float, initial_solution: list = None) -> Tuple[float, int]:
 
     # s: current solution and its weight
-    solution = initial_solution if initial_solution is not None else random_cycle(graph.number_of_nodes())
+    solution = initial_solution if initial_solution is not None else random_cycle(graph.nodes)
     weight   = evaluate(graph, solution)
     
     # s*: incumbent solution and its weight

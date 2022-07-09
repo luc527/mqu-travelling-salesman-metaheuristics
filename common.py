@@ -45,12 +45,12 @@ def parse_instance(filename):
     return tsplib.load(filename).get_graph()
 
 def brute_force(g: nx.Graph) -> Tuple[float, list]:
-    all_cycles = map(list, permutations(range(g.number_of_nodes())))
+    all_cycles = map(list, permutations(list(g.nodes)))
     return min(map(lambda s: (evaluate(g, s), s), all_cycles))
 
 def random_walk(iterations: int, g: nx.Graph) -> Tuple[float, list]:
     n = g.number_of_nodes()
-    sol = random_cycle(n)
+    sol = random_cycle(g.nodes)
     for _ in range(iterations):
         v = random.randrange(0, n)
         w = (v + 1) % n
@@ -67,8 +67,8 @@ def evaluate(graph, solution):
         s += graph.edges[v, w]['weight']
     return s
 
-def random_cycle(n):
-    solution = list(range(n))
-    random.shuffle(solution)
-    return solution
+def random_cycle(nodes):
+    nodes = list(nodes)
+    random.shuffle(nodes)
+    return nodes
 
