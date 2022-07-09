@@ -1,5 +1,7 @@
 import sys
+import random
 from common import * 
+from criterion import *
 
 def neighborhood(solution):
     n = len(solution)
@@ -45,81 +47,91 @@ Simple local search
 """
 
 def simple_local_search(select_neighbour):
-    def sls_with_given_select_fn(iterations: int, graph: nx.Graph, initial_solution: list = None) -> Tuple[float, list]:
+    def sls(graph, criterion_thunk, initial = None):
+        curr_sol = initial if initial is not None else random_cycle(graph.nodes)
+        curr_weight = evaluate(graph, curr_sol)
 
-        curr_solution = initial_solution if initial_solution is not None else random_cycle(graph.nodes)
-        curr_weight   = evaluate(graph, curr_solution)
+        criterion = criterion_thunk()
 
-        for _ in range(iterations):
-
-            (weight, solution) = select_neighbour(graph, curr_solution, curr_weight)
-            if weight == curr_weight:  # local optimum
+        while not criterion.stop():
+            (weight, sol) = select_neighbour(graph, curr_sol, curr_weight)
+            if weight == curr_weight:
+                # Local optimum
                 break
+            elif weight < curr_weight:
+                curr_weight, curr_sol = weight, sol
 
-            if weight < curr_weight:
-                curr_solution = solution
-                curr_weight   = weight
+            criterion.update(curr_weight)
 
-
-        return (curr_weight, curr_solution)
-    return sls_with_given_select_fn
+        return (curr_weight, curr_sol)
+    return sls
 
 """
 Randomized local search
 """
 
-def randomized_local_search(iterations: int, graph: nx.Graph, probability: float, initial_solution: list = None) -> Tuple[float, int]:
+def randomized_local_search(graph, probability, criterion_thunk, initial=None):
 
-    # s: current solution and its weight
-    solution = initial_solution if initial_solution is not None else random_cycle(graph.nodes)
-    weight   = evaluate(graph, solution)
-    
-    # s*: incumbent solution and its weight
-    inc_solution = solution
-    inc_weight   = weight
+    # current solution and its weight
+    sol = initial if initial is not None else random_cycle(graph.nodes)
+    weight = evaluate(graph, sol)
 
-    for _ in range(iterations):
+    # incumbent solution and its weight
+    inc_sol = sol
+    inc_weight = weight
+
+    criterion = criterion_thunk()
+
+    while not criterion.stop():
         r = random.random()
 
         if r <= probability:
-            (weight, solution) = random_neighbour(graph, solution)
+            (weight, sol) = random_neighbour(graph, sol)
         else:
-            (weight, solution) = best_neighbour(graph, solution, weight)
+            (next_weight, next_sol) = best_neighbour(graph, sol, weight)
+            if next_weight == weight:  # local optimum
+                (weight, sol) = random_neighbour(graph, sol)
+            else:
+                weight, sol = next_weight, next_sol
 
         if weight < inc_weight:
-            inc_solution = solution
-            inc_weight   = weight
+            inc_weight, inc_sol = weight, sol
 
-    return (inc_weight, inc_solution)
+        criterion.update(inc_weight)
+
+    return (inc_weight, inc_sol)
 
 if __name__ == '__main__':
+    # run for 10k iters
+    iter_crit_thunk = lambda: IterationCriterion(10000)
 
-    path = sys.argv[1]
+    # run for 1 min
+    time_crit_thunk = lambda: TimeCriterion(60)
 
-    if len(sys.argv) > 2:
-        iterations = int(sys.argv[2])
-    else:
-        iterations = 1000
+    # stop after seeing the best solution 1000 times
+    seen_crit_thunk = lambda: TimesSeenBestCriterion(1000)
 
-    graph = parse_instance(path)
 
-    print('Busca local simples com primeira melhora:')
-    print(simple_local_search(first_better_neighbour)(iterations, graph))
-    print()
+    filename = sys.argv[1]
+    graph = parse_instance(filename)
+    print(graph)
 
-    print('Busca local simples com melhor melhora:')
-    print(simple_local_search(best_neighbour)(iterations, graph))
-    print()
+    sls = simple_local_search(best_neighbour)
 
-    print('Busca local randomizada:')
-    print(randomized_local_search(iterations, graph, 0.5))
-    print()
+    #print('Simple local search, for 10k iters (or local optimum found):')
+    #print(sls(graph, iter_crit_thunk), end='\n\n')
 
-    print('Caminhada aleatória')
-    print(random_walk(iterations, graph))
-    print()
+    #print('Simple local search, for 1 minute (or local optimum found):')
+    #print(sls(graph, time_crit_thunk), end='\n\n')
 
-    #print('Solução ótima por força bruta:')
-    #print(brute_force(graph))
+    #print('Simple local search, after seeing the best solution 1000 times (or local optimum found):')
+    #print(sls(graph, seen_crit_thunk), end='\n\n')
 
-    # output_image(path, graph, solution)
+    #print('Randomized local search, for 10k iters:')
+    #print(randomized_local_search(graph, 0.4, iter_crit_thunk), end='\n\n')
+
+    #print('Randomized local search, for 1 minute:')
+    #print(randomized_local_search(graph, 0.4, time_crit_thunk), end='\n\n')
+
+    #print('Randomized local search, after seeing the best solution 1000 times:')
+    #print(randomized_local_search(graph, 0.4, seen_crit_thunk), end='\n\n')
