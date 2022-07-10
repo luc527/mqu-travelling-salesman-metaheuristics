@@ -39,9 +39,10 @@ instances = {
 # TODO some algorithms are missing
 
 algos = {
-    'RAND': { 'name': 'Random walk'},
-    'RLS': { 'name': 'Randomized local search'},
-    'RGA': { 'name': 'Repeated greedy-alpha'}
+    'RAND': { 'name': 'Random walk' },
+    'RLS': { 'name': 'Randomized local search (random initial solution)' },
+    'RGA': { 'name': 'Repeated greedy-alpha' },
+    'RLSG': { 'name': 'Randomized local search (greedy initial solution)' },
 }
 # Later each entry will also have a 'fn' entry with the function that implements the algorithm
 # So when adding algorithms here don't forget to also add them there
@@ -96,6 +97,7 @@ RUNS            = args.runs
 algos['RAND']['fn'] = lambda graph: random_walk(graph, make_criterion)
 algos['RLS']['fn'] = lambda graph: randomized_local_search(graph, RLS_PROBABILITY, make_criterion)
 algos['RGA']['fn'] = lambda graph: repeated_greedy(graph, lambda graph: greedy_alpha(graph, ALPHA), make_criterion)
+algos['RLSG']['fn'] = lambda graph: randomized_local_search(graph, RLS_PROBABILITY, make_criterion, greedy(graph)[1])
 
 
 algos_to_run = algos.keys()
