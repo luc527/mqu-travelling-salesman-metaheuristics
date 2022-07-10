@@ -1,11 +1,5 @@
 # TODO take a file name as argument, output JSON representation of 'stats' to it.
 
-# TODO make parameters configurable
-# - rls probability
-# - alpha
-# - number of runs
-# - iterations for each run
-
 from calendar import c
 from criterion import *
 from common import *
@@ -19,25 +13,26 @@ import argparse as argp
 # 'bks' is the best known solution
 
 instances = {
-    'a280':     { 'n': 280, 'path': 'instances/a280.tsp',     'bks':   2579 },
-    'att48':    { 'n':  48, 'path': 'instances/att48.tsp',    'bks':  10628 },
-    'bayg29':   { 'n':  29, 'path': 'instances/bayg29.tsp',   'bks':   1610 },
-    'bays29':   { 'n':  29, 'path': 'instances/bays29.tsp',   'bks':   2020 },
-    'berlin52': { 'n':  52, 'path': 'instances/berlin52.tsp', 'bks':   7542 },
-    'bier127':  { 'n': 127, 'path': 'instances/bier127.tsp',  'bks': 118282 },
-    'brazil58': { 'n':  58, 'path': 'instances/brazil58.tsp', 'bks':  25395 },
-    'eli51':    { 'n':  51, 'path': 'instances/eil51.tsp',    'bks':    426 },
-    'eli76':    { 'n':  76, 'path': 'instances/eil76.tsp',    'bks':    538 },
-    'eli101':   { 'n': 101, 'path': 'instances/eil101.tsp',   'bks':    629 },
-    'kroA100':  { 'n': 100, 'path': 'instances/kroA100.tsp',  'bks':  21282 },
-    'kroA150':  { 'n': 150, 'path': 'instances/kroA150.tsp',  'bks':  26524 },
-    'kroB100':  { 'n': 100, 'path': 'instances/kroB100.tsp',  'bks':  22141 },
-    'kroB150':  { 'n': 150, 'path': 'instances/kroB150.tsp',  'bks':  26130 },
-    'kroC100':  { 'n': 100, 'path': 'instances/kroC100.tsp',  'bks':  20749 },
-    'kroD100':  { 'n': 100, 'path': 'instances/kroD100.tsp',  'bks':  21294 },
-    'kroE100':  { 'n': 100, 'path': 'instances/kroE100.tsp',  'bks':  22068 },
-    'pr76':     { 'n':  76, 'path': 'instances/pr76.tsp',     'bks': 108159 },
-    'st70':     { 'n':  70, 'path': 'instances/st70.tsp',     'bks':    675 },
+    'a280':     { 'n':  280, 'path': 'instances/a280.tsp',     'bks':   2579 },
+    'att48':    { 'n':   48, 'path': 'instances/att48.tsp',    'bks':  10628 },
+    'bayg29':   { 'n':   29, 'path': 'instances/bayg29.tsp',   'bks':   1610 },
+    'bays29':   { 'n':   29, 'path': 'instances/bays29.tsp',   'bks':   2020 },
+    'berlin52': { 'n':   52, 'path': 'instances/berlin52.tsp', 'bks':   7542 },
+    'bier127':  { 'n':  127, 'path': 'instances/bier127.tsp',  'bks': 118282 },
+    'brazil58': { 'n':   58, 'path': 'instances/brazil58.tsp', 'bks':  25395 },
+    'd1655':    { 'n': 1655, 'path': 'instances/d1655.tsp',    'bks':  62128 },
+    'eli51':    { 'n':   51, 'path': 'instances/eil51.tsp',    'bks':    426 },
+    'eli76':    { 'n':   76, 'path': 'instances/eil76.tsp',    'bks':    538 },
+    'eli101':   { 'n':  101, 'path': 'instances/eil101.tsp',   'bks':    629 },
+    'kroA100':  { 'n':  100, 'path': 'instances/kroA100.tsp',  'bks':  21282 },
+    'kroA150':  { 'n':  150, 'path': 'instances/kroA150.tsp',  'bks':  26524 },
+    'kroB100':  { 'n':  100, 'path': 'instances/kroB100.tsp',  'bks':  22141 },
+    'kroB150':  { 'n':  150, 'path': 'instances/kroB150.tsp',  'bks':  26130 },
+    'kroC100':  { 'n':  100, 'path': 'instances/kroC100.tsp',  'bks':  20749 },
+    'kroD100':  { 'n':  100, 'path': 'instances/kroD100.tsp',  'bks':  21294 },
+    'kroE100':  { 'n':  100, 'path': 'instances/kroE100.tsp',  'bks':  22068 },
+    'pr76':     { 'n':   76, 'path': 'instances/pr76.tsp',     'bks': 108159 },
+    'st70':     { 'n':   70, 'path': 'instances/st70.tsp',     'bks':    675 },
 }
 
 
