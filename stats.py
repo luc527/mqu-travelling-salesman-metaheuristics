@@ -1,6 +1,5 @@
 # TODO take a file name as argument, output JSON representation of 'stats' to it.
 
-from calendar import c
 from criterion import *
 from common import *
 from local_search import *
