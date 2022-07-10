@@ -12,7 +12,7 @@ RLS_PROBABILITY = 0.4
 ALPHA = 0.1
 RUNS = 10
 
-criterion_thunk = lambda: IterationCriterion(3000)
+make_criterion = lambda: IterationCriterion(3000)
 
 instances = {
     'kroA100': 'instances/kroA100.tsp',
@@ -31,9 +31,9 @@ for (name, path) in instances.items():
 # TODO some algorithms are missing
 
 algos = {
-    'RAND': lambda graph: random_walk(graph, criterion_thunk),
-    'RLS': lambda graph: randomized_local_search(graph, RLS_PROBABILITY, criterion_thunk),
-    'RGA': lambda graph: repeated_greedy_alpha(graph, ALPHA, criterion_thunk)
+    'RAND': lambda graph: random_walk(graph, make_criterion),
+    'RLS': lambda graph: randomized_local_search(graph, RLS_PROBABILITY, make_criterion),
+    'RGA': lambda graph: repeated_greedy(graph, lambda graph: greedy_alpha(graph, ALPHA), make_criterion)
 }
 
 stats = {}
@@ -42,6 +42,7 @@ for instance in instances:
     for algo in algos:
         stats[instance][algo] = {}
         stats[instance][algo]['runs'] = {}
+        # TODO make runs an array, initialize as [0 for _ in range(RUNS)], then test (do 2 runs and without RGA, and/or smaller stop criterion)
 
 for run in range(RUNS):
     print('Run', run)

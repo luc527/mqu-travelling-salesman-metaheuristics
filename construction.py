@@ -105,17 +105,16 @@ def greedy_alpha(graph, alpha):
 Repeated greedy
 """
 
-def repeated_greedy_alpha(graph, alpha, make_criterion):
+def repeated_greedy(graph, construct_solution, make_criterion):
+    (inc_weight, inc_sol) = construct_solution(graph)
     criterion = make_criterion()
-
-    (inc_weight, inc_sol) = greedy_alpha(graph, alpha)
     while not criterion.stop():
-        (weight, sol) = greedy_alpha(graph, alpha)
+        (weight, sol) = construct_solution(graph)
         if weight < inc_weight:
             inc_weight, inc_sol = weight, sol
         criterion.update(inc_weight)
-
     return (inc_weight, inc_sol)
+
 
 def grasp_alpha(graph, alpha, make_criterion, rls_probability, rls_make_criterion):
     (inc_weight, inc_sol) = greedy_alpha(graph, alpha)
@@ -148,12 +147,9 @@ if __name__ == '__main__':
     #print('Greedy followed by randomized local search for 1 min:')
     #print(randomized_local_search(graph, 0.4, lambda: TimeCriterion(20), greedy_sol), end='\n\n')
 
-
     #print('Repeated greedy-alpha, for 10k iters:')
-    #print(repeated_greedy_alpha(graph, 0.2, lambda: IterationCriterion(10000)), end='\n\n')
-
-    #print('Repeated greedy-alpha, for 1 minute:')
-    #print(repeated_greedy_alpha(graph, 0.2, lambda: TimeCriterion(60)), end='\n\n')
+    #(rga_weight, rga_sol) = repeated_greedy(graph, lambda graph: greedy_alpha(graph, 0.2), lambda: IterationCriterion(10000))
+    #print((rga_weight, rga_sol), end='\n\n')
 
     #print('GRASP for 1 minute, with randomized local search for 1k iters at each step:')
     #print(grasp_alpha(graph, 0.2, lambda: TimeCriterion(60), 0.4, lambda: IterationCriterion(1000)))
