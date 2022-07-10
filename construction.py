@@ -115,16 +115,21 @@ def repeated_greedy(graph, construct_solution, make_criterion):
         criterion.update(inc_weight)
     return (inc_weight, inc_sol)
 
+"""
+GRASP
+"""
 
-def grasp_alpha(graph, alpha, make_criterion, rls_probability, rls_make_criterion):
-    (inc_weight, inc_sol) = greedy_alpha(graph, alpha)
+def grasp(graph, construct_solution, local_search, make_criterion):
+    (inc_weight, inc_sol) = construct_solution(graph)
 
     criterion = make_criterion()
+
     while not criterion.stop():
-        (weight, sol) = greedy_alpha(graph, alpha)
-        (weight, sol) = randomized_local_search(graph, rls_probability, rls_make_criterion, sol)
+        (weight, sol) = construct_solution(graph)
+        (weight, sol) = local_search(graph, sol)
         if weight < inc_weight:
             inc_weight, inc_sol = weight, sol
+        
         criterion.update(inc_weight)
 
     return (inc_weight, inc_sol)
@@ -151,19 +156,22 @@ if __name__ == '__main__':
     #(rga_weight, rga_sol) = repeated_greedy(graph, lambda graph: greedy_alpha(graph, 0.2), lambda: IterationCriterion(10000))
     #print((rga_weight, rga_sol), end='\n\n')
 
-    #print('GRASP for 1 minute, with randomized local search for 1k iters at each step:')
-    #print(grasp_alpha(graph, 0.2, lambda: TimeCriterion(60), 0.4, lambda: IterationCriterion(1000)))
+    #print('GRASP for 30 seconds, with randomized local search for 1k iters at each step:')
+    #(grasp_weight, grasp_sol) = grasp( \
+        #graph, \
+        #lambda graph: greedy_alpha(graph, 0.1), \
+        #lambda graph, initial: randomized_local_search(graph, 0.4, lambda: IterationCriterion(1000), initial), \
+        #lambda: TimeCriterion(30) \
+    #)
+    #print((grasp_weight, grasp_sol), end='\n\n')
 
-    # This is an example of where the time criterion implementation is imprecise
-    # after 59 seconds it may start a randomized local search with 1k iters
-    # then it has to perform the whole randomized local search, which might take
-    # like 10 seconds, before checking again for the time criterion, so it
-    # actually runs for 1 min 9 secs
-
-    #print('GRASP for 20 iters, with randomized local search for 10 secs at each step (200 secs total!):')
-    #print(grasp_alpha(graph, 0.2, lambda: IterationCriterion(20), 0.4, lambda: TimeCriterion(10)), end='\n\n')
-
-    #print('GRASP (with greedy-alpha) for 10 iters, with randomized local search for 10 secs at each step (100 secs total):')
-    #print(grasp_alpha(graph, 0.2, lambda: IterationCriterion(10), 0.4, lambda: TimeCriterion(10)), end='\n\n')
+    print('GRASP for 10 iters, with randomized local search for 20 seconds at each step (total 200 secs):')
+    (grasp_weight, grasp_sol) = grasp( \
+        graph, \
+        lambda graph: greedy_alpha(graph, 0.1), \
+        lambda graph, initial: randomized_local_search(graph, 0.4, lambda: TimeCriterion(20), initial), \
+        lambda: IterationCriterion(10)
+    )
+    print((grasp_weight, grasp_sol), end='\n\n')
 
     #output_image(sys.argv[1], graph, solution)
