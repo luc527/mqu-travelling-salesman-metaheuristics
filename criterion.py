@@ -1,6 +1,13 @@
 from abc import ABC, abstractmethod
 from time import time
 
+"""
+The optimization functions generally take a function that returns a StopCriterion
+This is because each StopCriterion has an internal state that has to be initialized at the start of the optimization function
+If we gave the optimizaton functions an instance directly, it's possible it has already been initialized (it's impossible to know from inside the function)
+Well, we don't really need that, as we are the only ones using the code and wouldn't make that mistake, but whatever
+"""
+
 class StopCriterion(ABC):
     @abstractmethod
     def update(self, solution_weight: int):
@@ -38,7 +45,7 @@ class TimeCriterion(StopCriterion):
 
 """
 Will stop after seeing the current best solution k times
-Crappy for local search, but it is what one article uses
+Kinda crappy, but it is what one article uses (or at least what I got from it)
 """
 class TimesSeenBestCriterion(StopCriterion):
     def __init__(self, k):
