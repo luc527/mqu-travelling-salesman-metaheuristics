@@ -1,11 +1,10 @@
-# TODO take a file name as argument, output JSON representation of 'stats' to it.
-
 from criterion import *
 from common import *
 from local_search import *
 from construction import *
 from pprint import pprint
 import argparse as argp
+import json
 
 
 # 'n' is the problem size (number of nodes)
@@ -53,12 +52,13 @@ description_str = f'Instances: {instances_str}\n\nAlgorithms: {algos_str}'
 
 parser = argp.ArgumentParser(description=description_str, formatter_class=argp.RawDescriptionHelpFormatter)
 
-parser.add_argument('--runs', type=int, default=10)
+parser.add_argument('--runs', type=int, default=10, help='Default 10')
 parser.add_argument('--rlsprob', type=float, default=0.4, help='The probability of taking a random neighbour in the randomized local search (default 0.4)')
 parser.add_argument('--alpha', type=float, default=0.1, help='The alpha for greedy-alpha (default 0.1)')
 parser.add_argument('--criterion', type=str, default='iters,3000', help='The stop criterion for each algorithm; options: iters,N for N iterations or time,N for N seconds (default iters,3000)')
 parser.add_argument('--algos', type=str, help='Which algorithms to run, separated by comma (no spaces!), or \'all\' to run all of them (example: RAND,RGA) (default all)', default='all')
 parser.add_argument('--instances', type=str, help='Which instances to run, separated by comma (no spaces!), or \'all\' to run all of them (example: brazil58,bier127,pr76) (default all)', default='all')
+parser.add_argument('--out', type=str, help='Output the generated statistics as JSON to this file')
 
 args = parser.parse_args()
 
@@ -98,7 +98,6 @@ algos['RLS']['fn'] = lambda graph: randomized_local_search(graph, RLS_PROBABILIT
 algos['RGA']['fn'] = lambda graph: repeated_greedy(graph, lambda graph: greedy_alpha(graph, ALPHA), make_criterion)
 algos['RLSG']['fn'] = lambda graph: randomized_local_search(graph, RLS_PROBABILITY, make_criterion, greedy(graph)[1])
 
-
 algos_to_run = algos.keys()
 if args.algos != 'all':
     algos_to_run = args.algos.split(',')
@@ -114,6 +113,8 @@ if args.instances != 'all':
 for instance in list(instances.keys()):
     if instance not in instances_to_run:
         del instances[instance]
+
+outpath = args.out
 
 print('Parsing instances...')
 
@@ -167,3 +168,9 @@ for instance in stats:
         stats[instance]['algos'][algo]['Davg%'] = ((avg - bks) / bks) * 100
 
 pprint(stats)
+
+if outpath is not None:
+    with open(outpath, 'w') as outfile:
+        output = json.dumps(stats, indent=4, sort_keys=True)
+        outfile.write(output)
+        print('Dumped JSON to ' + outpath)
