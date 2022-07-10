@@ -55,11 +55,11 @@ description_str = f'Instances: {instances_str}\n\nAlgorithms: {algos_str}'
 parser = argp.ArgumentParser(description=description_str, formatter_class=argp.RawDescriptionHelpFormatter)
 
 parser.add_argument('--runs', type=int, default=10)
-parser.add_argument('--rlsprob', type=float, default=0.4, help='The probability of taking a random neighbour in the randomized local search')
-parser.add_argument('--alpha', type=float, default=0.1, help='The alpha for greedy-alpha')
-parser.add_argument('--criterion', type=str, default='iters,3000', help='The stop criterion for each algorithm; options: iters,N for N iterations or time,N for N seconds')
-parser.add_argument('--algos', type=str, help='Which algorithms to run, separated by comma (no spaces!), or \'all\' to run all of them (example: RAND,RGA)', default='all')
-parser.add_argument('--instances', type=str, help='Which instances to run, separated by comma (no spaces!), or \'all\' to run all of them (example: brazil58,bier127,pr76)', default='all')
+parser.add_argument('--rlsprob', type=float, default=0.4, help='The probability of taking a random neighbour in the randomized local search (default 0.4)')
+parser.add_argument('--alpha', type=float, default=0.1, help='The alpha for greedy-alpha (default 0.1)')
+parser.add_argument('--criterion', type=str, default='iters,3000', help='The stop criterion for each algorithm; options: iters,N for N iterations or time,N for N seconds (default iters,3000)')
+parser.add_argument('--algos', type=str, help='Which algorithms to run, separated by comma (no spaces!), or \'all\' to run all of them (example: RAND,RGA) (default all)', default='all')
+parser.add_argument('--instances', type=str, help='Which instances to run, separated by comma (no spaces!), or \'all\' to run all of them (example: brazil58,bier127,pr76) (default all)', default='all')
 
 args = parser.parse_args()
 
@@ -144,6 +144,8 @@ for run in range(RUNS):
 for instance in stats:
     bks = instances[instance]['bks']
     stats[instance]['bks'] = bks
+
+    stats[instance]['greedy'] = greedy(graphs[instance])[0]
 
     for algo in stats[instance]['algos']:
         best  = float('inf')
