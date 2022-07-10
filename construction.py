@@ -105,8 +105,8 @@ def greedy_alpha(graph, alpha):
 Repeated greedy
 """
 
-def repeated_greedy_alpha(graph, alpha, criterion_thunk):
-    criterion = criterion_thunk()
+def repeated_greedy_alpha(graph, alpha, make_criterion):
+    criterion = make_criterion()
 
     (inc_weight, inc_sol) = greedy_alpha(graph, alpha)
     while not criterion.stop():
@@ -117,13 +117,13 @@ def repeated_greedy_alpha(graph, alpha, criterion_thunk):
 
     return (inc_weight, inc_sol)
 
-def grasp_alpha(graph, alpha, criterion_thunk, rls_probability, rls_criterion_thunk):
+def grasp_alpha(graph, alpha, make_criterion, rls_probability, rls_make_criterion):
     (inc_weight, inc_sol) = greedy_alpha(graph, alpha)
 
-    criterion = criterion_thunk()
+    criterion = make_criterion()
     while not criterion.stop():
         (weight, sol) = greedy_alpha(graph, alpha)
-        (weight, sol) = randomized_local_search(graph, rls_probability, rls_criterion_thunk, sol)
+        (weight, sol) = randomized_local_search(graph, rls_probability, rls_make_criterion, sol)
         if weight < inc_weight:
             inc_weight, inc_sol = weight, sol
         criterion.update(inc_weight)
@@ -135,28 +135,30 @@ if __name__ == '__main__':
     filename = sys.argv[1]
     graph = parse_instance(filename)
 
+    iter_crit_ctor = lambda: IterationCriterion(10000)
+    time_crit_ctor = lambda: TimeCriterion(60)
+    seen_crit_ctor = lambda: TimesSeenBestCriterion(10)
+
     print(graph)
 
     print('Greedy:')
     (weight, greedy_sol) = greedy(graph)
-    print(weight, greedy_sol, end='\n\n')
+    print((weight, greedy_sol), end='\n\n')
 
-    iter_crit_thunk = lambda: IterationCriterion(10000)
-    time_crit_thunk = lambda: TimeCriterion(60)
-    seen_crit_thunk = lambda: TimesSeenBestCriterion(10)
+    #print('Greedy followed by randomized local search for 1 min:')
+    #print(randomized_local_search(graph, 0.4, lambda: TimeCriterion(20), greedy_sol), end='\n\n')
+
 
     #print('Repeated greedy-alpha, for 10k iters:')
-    #print(repeated_greedy_alpha(graph, 0.2, iter_crit_thunk), end='\n\n')
+    #print(repeated_greedy_alpha(graph, 0.2, lambda: IterationCriterion(10000)), end='\n\n')
 
     #print('Repeated greedy-alpha, for 1 minute:')
-    #print(repeated_greedy_alpha(graph, 0.2, time_crit_thunk), end='\n\n')
-
-    #print('Repeated greedy-alpha, after seeing the best solution 10 times:')
-    #print(repeated_greedy_alpha(graph, 0.2, seen_crit_thunk), end='\n\n')
+    #print(repeated_greedy_alpha(graph, 0.2, lambda: TimeCriterion(60)), end='\n\n')
 
     #print('GRASP for 1 minute, with randomized local search for 1k iters at each step:')
     #print(grasp_alpha(graph, 0.2, lambda: TimeCriterion(60), 0.4, lambda: IterationCriterion(1000)))
-    ## This is an example of where the time criterion implementation is imprecise
+
+    # This is an example of where the time criterion implementation is imprecise
     # after 59 seconds it may start a randomized local search with 1k iters
     # then it has to perform the whole randomized local search, which might take
     # like 10 seconds, before checking again for the time criterion, so it
@@ -167,8 +169,5 @@ if __name__ == '__main__':
 
     #print('GRASP (with greedy-alpha) for 10 iters, with randomized local search for 10 secs at each step (100 secs total):')
     #print(grasp_alpha(graph, 0.2, lambda: IterationCriterion(10), 0.4, lambda: TimeCriterion(10)), end='\n\n')
-
-    #print('Greedy followed by randomized local search for 1 min:')
-    #print(randomized_local_search(graph, 0.4, time_crit_thunk, greedy_sol), end='\n\n')
 
     #output_image(sys.argv[1], graph, solution)
