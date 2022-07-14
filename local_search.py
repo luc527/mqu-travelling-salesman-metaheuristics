@@ -117,12 +117,51 @@ def randomized_local_search(graph, probability, make_criterion, initial=None):
 
     return (inc_weight, inc_sol)
 
+"""
+Iterated Local Search
+"""
+
+def perturb(solution, size):
+    pd = list(solution) #perturbed
+    n = len(solution)
+    for _ in range(size):
+        i = random.randrange(0, n)
+        j = (i + 1) % n
+        pd[i], pd[j] = pd[j], pd[i]
+    return pd
+
+
+def iterated_local_search(graph, local_search, make_criterion, perturbance_size, initial=None):
+
+    initial = initial if initial is not None else random_cycle(graph.nodes)
+    (weight, sol) = local_search(graph, initial)
+    inc_weight, inc_sol = weight, sol
+
+    # TODO what could this be?
+    def accept(weight, sol):
+        return True
+
+    criterion = make_criterion()
+
+    while not criterion.stop():
+        new_sol = perturb(sol, perturbance_size)
+        (new_weight, new_sol) = local_search(graph, new_sol)
+
+        if accept(new_weight, new_sol):
+            weight, sol = new_weight, new_sol
+        if weight < inc_weight:
+            inc_weight, inc_sol = weight, sol
+
+        criterion.update(inc_weight)
+
+    return (inc_weight, inc_sol)
+
 if __name__ == '__main__':
 
     filename = sys.argv[1]
     graph = parse_instance(filename)
     
-    #initial = random_cycle(graph.nodes)
+    initial = random_cycle(graph.nodes)
     #print('Initial random solution:')
     #print((evaluate(graph, initial), initial), end='\n\n')
 
@@ -140,5 +179,14 @@ if __name__ == '__main__':
     #print('Randomized local search, for 10k iters:')
     #print(randomized_local_search(graph, 0.4, lambda: IterationCriterion(10000), initial), end='\n\n')
 
-    #print('Randomized local search, for 1 minute:')
-    #print(randomized_local_search(graph, 0.4, lambda: TimeCriterion(60), initial), end='\n\n')
+    print('Randomized local search, for 1 minute:')
+    print(randomized_local_search(graph, 0.4, lambda: TimeCriterion(60), initial), end='\n\n')
+
+    print('Iterated local search (for 1 min, with randomized local search for 2k iters):')
+    print(iterated_local_search(\
+        graph,\
+        lambda graph, initial: randomized_local_search(graph, 0.3, lambda: IterationCriterion(2000), initial),\
+        lambda: TimeCriterion(60),\
+        10,\
+        initial\
+    )) #instead of 10 could be a probability like 0.2 like the alpha in greedy-alpha
