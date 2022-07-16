@@ -119,17 +119,18 @@ def randomized_local_search(graph, probability, make_criterion, initial=None):
 Iterated Local Search
 """
 
-def perturb(solution, size):
+def perturb(solution, perc):
     pd = list(solution) #perturbed
     n = len(solution)
-    for _ in range(size):
+    k = int(n * perc)
+    for _ in range(k):
         i = random.randrange(0, n)
         j = (i + 1) % n
         pd[i], pd[j] = pd[j], pd[i]
     return pd
 
 
-def iterated_local_search(graph, local_search, make_criterion, perturbance_size, initial=None):
+def iterated_local_search(graph, local_search, make_criterion, perturbance_percentage, initial=None):
 
     initial = initial if initial is not None else random_cycle(graph.nodes)
     (weight, sol) = local_search(graph, initial)
@@ -142,7 +143,7 @@ def iterated_local_search(graph, local_search, make_criterion, perturbance_size,
     criterion = make_criterion()
 
     while not criterion.stop():
-        new_sol = perturb(sol, perturbance_size)
+        new_sol = perturb(sol, perturbance_percentage)
         (new_weight, new_sol) = local_search(graph, new_sol)
 
         if accept(new_weight, new_sol):
@@ -185,6 +186,6 @@ if __name__ == '__main__':
         graph,\
         lambda graph, initial: randomized_local_search(graph, 0.3, lambda: IterationCriterion(2000), initial),\
         lambda: TimeCriterion(60),\
-        10,\
+        0.2,\
         initial\
-    )) #instead of 10 could be a probability like 0.2 like the alpha in greedy-alpha
+    ))

@@ -41,6 +41,8 @@ algos = {
     'RLS': { 'name': 'Randomized local search (random initial solution)' },
     'RGA': { 'name': 'Repeated greedy-alpha' },
     'RLSG': { 'name': 'Randomized local search (greedy initial solution)' },
+    'ILSRR': { 'name': 'Iterated local search (with randomized local search and random initial solution) '},
+    'ILSRG': { 'name': 'Iterated local search (with randomized local search and greedy initial solution) '}
 }
 # Later each entry will also have a 'fn' entry with the function that implements the algorithm
 # So when adding algorithms here don't forget to also add them there too
@@ -57,11 +59,20 @@ parser.add_argument('--runs', type=int, default=10, help='Default 10')
 parser.add_argument('--rlsprob', type=float, default=0.4,\
     help='The probability of taking a random neighbour in the randomized local search (default 0.4)')
 
+parser.add_argument('--ilsperc', type=float, default=0.1,\
+    help='The percentage of a perturbance at each iteration of the iterated local search (default 0.1)')
+
 parser.add_argument('--alpha', type=float, default=0.1,\
     help='The alpha for greedy-alpha (default 0.1)')
 
 parser.add_argument('--criterion', type=str, default='iters,3000',\
-    help='The stop criterion for each algorithm; options: iters,N for N iterations or time,N for N seconds (default iters,3000)')
+    help='The stop criterion for each algorithm; options: iters,N for N iterations, time,N for N seconds or seen,N for N times seen the best solution so far (default iters,3000)')
+
+parser.add_argument('--subcriterion', type=str, default='iters,1000',\
+    help='Some algorithms use other algorithms at each iteration (e.g. GRASP does a local search at each iteration), so you can use this parameter to set the criterion for these sub-algorithms (default: iters,100)')
+
+parser.add_argument('--supercriterion', type=str,\
+    help='Stop criterion for the outer loop of algorithms like GRASP and ILS in which each iteration is itself another algorithm (the idea is to allow for something like --criterion iters,3000 --supercriterion iters,30 --subcriterion iters,100 if you don\'t want those algorithms to take too long) (if not informed, takes the same value as --criterion)')
 
 parser.add_argument('--algos', type=str, default='all',\
     help='Which algorithms to run, separated by comma (no spaces!), or \'all\' to run all of them (example: RAND,RGA) (default all)')
@@ -78,36 +89,62 @@ if args.runs < 1 or args.runs > 100:
     quit()
 
 if args.rlsprob < 0 or args.rlsprob > 1:
-    print('--rlsprob must be in (0, 1]')
+    print('--rlsprob must be in [0, 1]')
     quit()
 
 if args.alpha < 0 or args.alpha > 1:
-    print('--alpha must be in (0, 1]')
+    print('--alpha must be in [0, 1]')
     quit()
 
-crit_toks = args.criterion.split(',')
-if len(crit_toks) != 2:
-    print('Malformed --criterion')
+if args.ilsperc < 0 or args.ilsperc > 1:
+    print('--ilsperc must be in [0, 1]')
     quit()
 
-[crit, crit_N] = crit_toks
-crit_N = int(crit_N)
-if crit == 'time':
-    make_criterion = lambda: TimeCriterion(crit_N)
-elif crit == 'iters':
-    make_criterion = lambda: IterationCriterion(crit_N)
-else:
-    print(f'Malformed criterion {crit}')
-    quit()
+def criterion_from_arg(criterion_string):
+    toks = criterion_string.split(',')
+    if len(toks) != 2:
+        print('Malformed criterion argument ' + criterion_string)
+        quit()
+    [crit, n] = toks
+    n = int(n)
+    if crit == 'time':
+        mk = lambda: TimeCriterion(n)
+    elif crit == 'iters':
+        mk = lambda: IterationCriterion(n)
+    elif crit == 'seen':
+        mk = lambda: TimesSeenBestCriterion(n)
+    else:
+        print(f'Unknown criterion {crit}')
+        quit()
 
-RLS_PROBABILITY = args.rlsprob
-ALPHA           = args.alpha
-RUNS            = args.runs
+    return mk
+
+make_criterion = criterion_from_arg(args.criterion)
+make_supercriterion = make_criterion if args.supercriterion is None else criterion_from_arg(args.supercriterion)
+make_subcriterion = criterion_from_arg(args.subcriterion)
+
+RLS_PROBABILITY      = args.rlsprob
+ALPHA                = args.alpha
+RUNS                 = args.runs
+ILS_PERTURBANCE_PERC = args.ilsperc
 
 algos['RAND']['fn'] = lambda graph: random_walk(graph, make_criterion)
 algos['RLS']['fn'] = lambda graph: randomized_local_search(graph, RLS_PROBABILITY, make_criterion)
 algos['RGA']['fn'] = lambda graph: repeated_greedy(graph, lambda graph: greedy_alpha(graph, ALPHA), make_criterion)
 algos['RLSG']['fn'] = lambda graph: randomized_local_search(graph, RLS_PROBABILITY, make_criterion, greedy(graph)[1])
+algos['ILSRR']['fn'] = lambda graph: iterated_local_search(\
+    graph,\
+    lambda graph, initial: randomized_local_search(graph, RLS_PROBABILITY, make_subcriterion, initial),\
+    make_supercriterion,\
+    ILS_PERTURBANCE_PERC\
+)
+algos['ILSRG']['fn'] = lambda graph: iterated_local_search(\
+    graph,\
+    lambda graph, initial: randomized_local_search(graph, RLS_PROBABILITY, make_subcriterion, initial),\
+    make_supercriterion,\
+    ILS_PERTURBANCE_PERC,\
+    greedy(graph)[1]\
+)
 
 algos_to_run = algos.keys()
 if args.algos != 'all':
