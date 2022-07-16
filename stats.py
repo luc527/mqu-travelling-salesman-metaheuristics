@@ -71,8 +71,8 @@ parser.add_argument('--criterion', type=str, default='iters,3000',\
 parser.add_argument('--subcriterion', type=str, default='iters,1000',\
     help='Some algorithms use other algorithms at each iteration (e.g. GRASP does a local search at each iteration), so you can use this parameter to set the criterion for these sub-algorithms (default: iters,100)')
 
-parser.add_argument('--supercriterion', type=str,\
-    help='Stop criterion for the outer loop of algorithms like GRASP and ILS in which each iteration is itself another algorithm (the idea is to allow for something like --criterion iters,3000 --supercriterion iters,30 --subcriterion iters,100 if you don\'t want those algorithms to take too long) (if not informed, takes the same value as --criterion)')
+parser.add_argument('--supercriterion', type=str, default='iters,30',\
+    help='Stop criterion for the outer loop of algorithms like GRASP and ILS in which each iteration is itself another algorithm (the idea is to allow for something like --criterion iters,3000 --supercriterion iters,30 --subcriterion iters,100 if you don\'t want those algorithms to take too long) (default: iters,30)')
 
 parser.add_argument('--algos', type=str, default='all',\
     help='Which algorithms to run, separated by comma (no spaces!), or \'all\' to run all of them (example: RAND,RGA) (default all)')
