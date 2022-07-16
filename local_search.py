@@ -81,8 +81,6 @@ def multiple_start_local_search(graph, make_criterion, local_search):
 
     return (inc_weight, inc_sol)
 
-# TODO busca local iterada
-
 """
 Randomized local search
 """
