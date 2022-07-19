@@ -37,12 +37,15 @@ instances = {
 # TODO some algorithms are missing
 
 algos = {
+    'SLSF': { 'name': 'Simple local search (first better neighbour)' },
+    'SLSB': { 'name': 'Simple local search (best neighbour)' },
     'RAND': { 'name': 'Random walk' },
     'RLS': { 'name': 'Randomized local search (random initial solution)' },
     'RGA': { 'name': 'Repeated greedy-alpha' },
     'RLSG': { 'name': 'Randomized local search (greedy initial solution)' },
     'ILSRR': { 'name': 'Iterated local search (with randomized local search and random initial solution) '},
-    'ILSRG': { 'name': 'Iterated local search (with randomized local search and greedy initial solution) '}
+    'ILSRG': { 'name': 'Iterated local search (with randomized local search and greedy initial solution) '},
+    'GRASPR': { 'name': 'GRASP (randomized local search, random initial solution)' }
 }
 # Later each entry will also have a 'fn' entry with the function that implements the algorithm
 # So when adding algorithms here don't forget to also add them there too
@@ -128,6 +131,8 @@ ALPHA                = args.alpha
 RUNS                 = args.runs
 ILS_PERTURBANCE_PERC = args.ilsperc
 
+algos['SLSF']['fn'] = lambda graph: simple_local_search(graph, make_criterion, first_better_neighbour)
+algos['SLSB']['fn'] = lambda graph: simple_local_search(graph, make_criterion, best_neighbour)
 algos['RAND']['fn'] = lambda graph: random_walk(graph, make_criterion)
 algos['RLS']['fn'] = lambda graph: randomized_local_search(graph, RLS_PROBABILITY, make_criterion)
 algos['RGA']['fn'] = lambda graph: repeated_greedy(graph, lambda graph: greedy_alpha(graph, ALPHA), make_criterion)
@@ -144,6 +149,12 @@ algos['ILSRG']['fn'] = lambda graph: iterated_local_search(\
     make_supercriterion,\
     ILS_PERTURBANCE_PERC,\
     greedy(graph)[1]\
+)
+algos['GRASPR']['fn'] = lambda graph: grasp(\
+        graph,\
+        lambda graph: greedy_alpha(graph, ALPHA),\
+        lambda graph, initial: randomized_local_search(graph, RLS_PROBABILITY, make_subcriterion, initial),\
+        make_supercriterion\
 )
 
 algos_to_run = algos.keys()

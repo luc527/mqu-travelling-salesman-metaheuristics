@@ -3,6 +3,13 @@ import random
 from common import * 
 from criterion import *
 
+"""
+Simple local search (w/ select_neighbour as arg)
+Multiple start local search (w/ local_search as arg)
+Randomized local search
+Iterated local search (w/ local_search as arg)
+"""
+
 def neighborhood(solution):
     n = len(solution)
     for i in range(n):
