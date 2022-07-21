@@ -46,7 +46,7 @@ algos = {
     'RLSG': { 'name': 'Randomized local search (greedy initial solution)' },
     'ILSRR': { 'name': 'Iterated local search (with randomized local search and random initial solution) '},
     'ILSRG': { 'name': 'Iterated local search (with randomized local search and greedy initial solution) '},
-    'GRASPR': { 'name': 'GRASP (randomized local search, random initial solution)' }
+    'GRASPR': { 'name': 'GRASP (randomized local search)' },
 }
 # Later each entry will also have a 'fn' entry with the function that implements the algorithm
 # So when adding algorithms here don't forget to also add them there too
@@ -127,6 +127,8 @@ make_criterion = criterion_from_arg(args.criterion)
 make_supercriterion = make_criterion if args.supercriterion is None else criterion_from_arg(args.supercriterion)
 make_subcriterion = criterion_from_arg(args.subcriterion)
 
+sub_rls_fn = lambda graph, initial: randomized_local_search(graph, RLS_PROBABILITY, make_subcriterion, initial)
+
 RLS_PROBABILITY      = args.rlsprob
 ALPHA                = args.alpha
 RUNS                 = args.runs
@@ -140,13 +142,13 @@ algos['RGA']['fn'] = lambda graph: repeated_greedy(graph, lambda graph: greedy_a
 algos['RLSG']['fn'] = lambda graph: randomized_local_search(graph, RLS_PROBABILITY, make_criterion, greedy(graph)[1])
 algos['ILSRR']['fn'] = lambda graph: iterated_local_search(\
     graph,\
-    lambda graph, initial: randomized_local_search(graph, RLS_PROBABILITY, make_subcriterion, initial),\
+    sub_rls_fn,\
     make_supercriterion,\
     ILS_PERTURBANCE_PERC\
 )
 algos['ILSRG']['fn'] = lambda graph: iterated_local_search(\
     graph,\
-    lambda graph, initial: randomized_local_search(graph, RLS_PROBABILITY, make_subcriterion, initial),\
+    sub_rls_fn,\
     make_supercriterion,\
     ILS_PERTURBANCE_PERC,\
     greedy(graph)[1]\
@@ -154,7 +156,7 @@ algos['ILSRG']['fn'] = lambda graph: iterated_local_search(\
 algos['GRASPR']['fn'] = lambda graph: grasp(\
         graph,\
         lambda graph: greedy_alpha(graph, ALPHA),\
-        lambda graph, initial: randomized_local_search(graph, RLS_PROBABILITY, make_subcriterion, initial),\
+        sub_rls_fn,\
         make_supercriterion\
 )
 
