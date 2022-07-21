@@ -9,7 +9,10 @@ from math import ceil
 from heapq import heappush, heappushpop
 
 """
-Greedy and semi-greedy (alpha) algorithms (closest neighbour at each step)
+Greedy (nearest neighbour)
+Greedy-alpha
+Repeated greedy (w/ construct_solution as arg)
+GRASP (w/ construct_solution AND local_search as args)
 """
 
 def greedy(graph):
@@ -127,12 +130,6 @@ def greedy_alpha(graph, alpha):
     cycle.append(curr_node)
 
     while visited < n:
-
-        """
-        At each moment we store only the best alpha% nodes seen
-        We do that efficiently by storing them in a heap ordered by how bad each node is,
-        and maintain the best ones by removing the worst seen so far when we exceed the size of alpha%
-        """
 
         n_left = n - visited
         k = ceil(alpha * n_left)
