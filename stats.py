@@ -3,6 +3,7 @@ from common import *
 from local_search import *
 from construction import *
 from pprint import pprint
+import tsplib95
 import argparse as argp
 import json
 
@@ -166,10 +167,13 @@ outpath = args.out
 
 print('Parsing instances...')
 
+problems = {}  # returns from tsplib95.load
 graphs = {}
 for name in instances:
     print(f'    Parsing {name}...')
-    graphs[name] = parse_instance(instances[name]['path'])
+    problem = tsplib95.load(instances[name]['path'])
+    problems[name] = problem
+    graphs[name] = problem.get_graph()
 print()
 
 stats = {}
@@ -193,7 +197,16 @@ for instance in stats:
     bks = instances[instance]['bks']
     stats[instance]['bks'] = bks
 
-    stats[instance]['greedy'] = greedy(graphs[instance])[0]
+    greedy_weight = greedy(graphs[instance])[0]
+    stats[instance]['greedy'] = {}
+    stats[instance]['greedy']['weight'] = greedy_weight
+    stats[instance]['greedy']['D%'] = ((greedy_weight - bks) / bks) * 100
+
+    if problems[instance].edge_weight_type == 'EUC_2D':
+        greedym_weight = greedy_manhattan(problems[instance])[0]
+        stats[instance]['greedy_manhattan'] = {}
+        stats[instance]['greedy_manhattan']['weight'] = greedym_weight
+        stats[instance]['greedy_manhattan']['D%'] = ((greedym_weight - bks) / bks) * 100
 
     for algo in stats[instance]['algos']:
         best  = float('inf')

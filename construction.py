@@ -48,6 +48,66 @@ def greedy(graph):
     
     return (evaluate(graph, cycle), cycle)
 
+"""
+For euclidean graphs, this implementation evaluates
+edges according to their manhattan distance, instead
+of their euclidean distance. Takes a TSP problem
+(return of tsplib95.load()) directly so it can access
+the actual coordinates of the nodes in 2D space.
+"""
+def greedy_manhattan(tsp_problem):
+
+    node_coords = tsp_problem.node_coords
+
+    cycle = []
+
+    num_visited = 0
+    visited = {}
+
+    for k in node_coords:
+        visited[k] = False
+
+    curr_node = 1
+
+    cycle.append(curr_node)
+    visited[curr_node] = True
+    num_visited += 1
+
+    num_nodes = len(node_coords)
+
+    while num_visited < num_nodes:
+        min_adjacent_node = -1
+        min_weight = float('inf')
+
+        for other_node in range(1, num_nodes+1):
+
+            if other_node == curr_node:
+                continue
+
+            if visited[other_node]:
+                continue
+
+            other_node_coord = node_coords[other_node]
+
+            # manhattan distance
+            [ curr_x,  curr_y] = node_coords[curr_node]
+            [other_x, other_y] = other_node_coord
+            weight = abs(other_x - curr_x)\
+                   + abs(other_y - curr_y)
+
+            if weight < min_weight:
+                min_weight = weight
+                min_adjacent_node = other_node
+
+        cycle.append(min_adjacent_node)
+        num_visited += 1
+        visited[min_adjacent_node] = True
+        
+        curr_node = min_adjacent_node
+
+    return (evaluate(tsp_problem.get_graph(), cycle), cycle)
+
+
 def greedy_alpha(graph, alpha):
     nodes = list(graph.nodes)
     n = graph.number_of_nodes()
