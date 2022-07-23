@@ -19,7 +19,7 @@ instances = {
     'berlin52': { 'n':   52, 'path': 'instances/berlin52.tsp', 'bks':   7542 },
     'bier127':  { 'n':  127, 'path': 'instances/bier127.tsp',  'bks': 118282 },
     'brazil58': { 'n':   58, 'path': 'instances/brazil58.tsp', 'bks':  25395 },
-    'd1655':    { 'n': 1655, 'path': 'instances/d1655.tsp',    'bks':  62128 },
+    'lin105':   { 'n':  105, 'path': 'instances/lin105.tsp',   'bks':  14379 },
     'eli51':    { 'n':   51, 'path': 'instances/eil51.tsp',    'bks':    426 },
     'eli76':    { 'n':   76, 'path': 'instances/eil76.tsp',    'bks':    538 },
     'eli101':   { 'n':  101, 'path': 'instances/eil101.tsp',   'bks':    629 },
