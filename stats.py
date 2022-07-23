@@ -86,6 +86,8 @@ parser.add_argument('--instances', type=str, default='all',\
 
 parser.add_argument('--out', type=str, help='Output the generated statistics as JSON to this file')
 
+parser.add_argument('--csv', type=str, help='Output the generated statistics as CSV to this file')
+
 args = parser.parse_args()
 
 if args.runs < 1 or args.runs > 100:
@@ -178,6 +180,8 @@ for instance in list(instances.keys()):
 
 outpath = args.out
 
+csvpath = args.csv
+
 print('Parsing instances...')
 
 problems = {}  # returns from tsplib95.load
@@ -248,3 +252,39 @@ if outpath is not None:
         output = json.dumps(stats, indent=4, sort_keys=True)
         outfile.write(output)
         print('Dumped JSON to ' + outpath)
+
+if csvpath is not None:
+
+    def write_line(f, line):
+        f.write(';'.join(str(x) for x in line))
+        f.write('\n')
+
+    def fmt_perc(perc):
+        return '{0:.2f}%'.format(perc)
+
+    def fmt_avg(avg):
+        return '{0:.1f}'.format(avg)
+
+    with open(csvpath, 'w') as f:
+
+        header = ['instance', 'BKS', 'G.W', 'G.D%', 'GM.W', 'GM.D%']
+        for algo in algos:
+            header.append(algo + '.W')
+            header.append(algo + '.D%')
+        write_line(f, header)
+
+        for instance in stats:
+            line = [\
+                instance,\
+                stats[instance]['bks'],\
+                stats[instance]['greedy']['weight'],\
+                fmt_perc(stats[instance]['greedy']['D%']),\
+                stats[instance]['greedy_manhattan']['weight'] if 'greedy_manhattan' in stats[instance] else '-',\
+                fmt_perc(stats[instance]['greedy_manhattan']['D%']) if 'greedy_manhattan' in stats[instance] else '-',\
+            ]
+            for algo in algos:
+                line.append(fmt_avg(stats[instance]['algos'][algo]['avg']))
+                line.append(fmt_perc(stats[instance]['algos'][algo]['Davg%']))
+            write_line(f, line)
+    
+    print('Dumped CSV to ' + csvpath)
