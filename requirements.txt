@@ -1,3 +1,2 @@
 tsplib95
-graphviz
 networkx

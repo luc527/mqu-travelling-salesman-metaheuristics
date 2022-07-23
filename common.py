@@ -1,45 +1,8 @@
 from typing import Tuple
 import tsplib95 as tsplib
 import networkx as nx
-import graphviz
 import random
 from itertools import permutations
-
-# let's get instances from http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp/
-
-def output_image(filepath: str, graph: nx.Graph, cycle: list):
-    lastidx = -1
-    for i, c in enumerate(filepath):
-        if c == '/':
-            lastidx = i
-    filepath = filepath[lastidx+1:]
-
-    verts = graph.number_of_nodes()
-
-    cycle_edges = list(zip(cycle, [cycle[-1]] + cycle[:-1]))
-
-    viz = graphviz.Graph(filepath, engine='dot')
-    # viz.attr('node', {'shape': 'point'})
-    viz.attr('edge', {'fontsize': '8'})
-
-    only_cycle = verts > 40
-
-    for a in range(verts):
-        viz.node(str(a))
-
-    for b in range(verts):
-        for a in range(b):
-            label = str(graph.edges[a,b]['weight'])
-            attr = {}
-            in_cycle = (a,b) in cycle_edges or (b,a) in cycle_edges
-            if not only_cycle and in_cycle:
-                attr['color'] = 'red'
-                attr['penwidth'] = '3'
-            if not only_cycle or in_cycle:
-                viz.edge(str(a), str(b), label, attr)
-    dir = 'images'
-    print('Rendering...')
-    print(f'Rendered graph on {filepath}, see {viz.render(directory=dir)}') 
 
 def parse_instance(filename):
     return tsplib.load(filename).get_graph()
