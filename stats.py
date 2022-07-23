@@ -260,7 +260,7 @@ if csvpath is not None:
         f.write('\n')
 
     def fmt_perc(perc):
-        return '{0:.2f}%'.format(perc)
+        return '{0:.2f}'.format(perc)
 
     def fmt_avg(avg):
         return '{0:.1f}'.format(avg)
@@ -279,8 +279,8 @@ if csvpath is not None:
                 stats[instance]['bks'],\
                 stats[instance]['greedy']['weight'],\
                 fmt_perc(stats[instance]['greedy']['D%']),\
-                stats[instance]['greedy_manhattan']['weight'] if 'greedy_manhattan' in stats[instance] else '-',\
-                fmt_perc(stats[instance]['greedy_manhattan']['D%']) if 'greedy_manhattan' in stats[instance] else '-',\
+                stats[instance]['greedy_manhattan']['weight'] if 'greedy_manhattan' in stats[instance] else '0',\
+                fmt_perc(stats[instance]['greedy_manhattan']['D%']) if 'greedy_manhattan' in stats[instance] else '0',\
             ]
             for algo in algos:
                 line.append(fmt_avg(stats[instance]['algos'][algo]['avg']))
